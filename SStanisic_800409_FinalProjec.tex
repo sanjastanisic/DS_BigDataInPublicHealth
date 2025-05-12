@@ -1,0 +1,1058 @@
+\PassOptionsToPackage{unicode=true}{hyperref} % options for packages loaded elsewhere
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\usepackage{fixltx2e} % provides \textsubscript
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provides euro and other symbols
+\else % if luatex or xelatex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Ligatures=TeX,Scale=MatchLowercase}
+\fi
+% use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+% use microtype if available
+\IfFileExists{microtype.sty}{%
+\usepackage[]{microtype}
+\UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\IfFileExists{parskip.sty}{%
+\usepackage{parskip}
+}{% else
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+}
+\usepackage{hyperref}
+\hypersetup{
+            pdftitle={Big Data in Public Health - Final Project},
+            pdfauthor={Sanja Stanisic, Universita' degli Studi di Milano Bicocca, CdLM Data Science, n. 800409},
+            pdfborder={0 0 0},
+            breaklinks=true}
+\urlstyle{same}  % don't use monospace font for urls
+\usepackage[margin=1in]{geometry}
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\usepackage{longtable,booktabs}
+% Fix footnotes in tables (requires footnote package)
+\IfFileExists{footnote.sty}{\usepackage{footnote}\makesavenoteenv{longtable}}{}
+\usepackage{graphicx,grffile}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+\setlength{\emergencystretch}{3em}  % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{0}
+% Redefines (sub)paragraphs to behave more like sections
+\ifx\paragraph\undefined\else
+\let\oldparagraph\paragraph
+\renewcommand{\paragraph}[1]{\oldparagraph{#1}\mbox{}}
+\fi
+\ifx\subparagraph\undefined\else
+\let\oldsubparagraph\subparagraph
+\renewcommand{\subparagraph}[1]{\oldsubparagraph{#1}\mbox{}}
+\fi
+
+% set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+
+
+\title{Big Data in Public Health - Final Project}
+\author{Sanja Stanisic, Universita' degli Studi di Milano Bicocca, CdLM Data
+Science, n. 800409}
+\date{21. May 2021.}
+
+\begin{document}
+\maketitle
+
+{
+\setcounter{tocdepth}{5}
+\tableofcontents
+}
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{library}\NormalTok{(tidyr)}
+\KeywordTok{library}\NormalTok{(dplyr)}
+\KeywordTok{library}\NormalTok{(data.table)}
+\KeywordTok{library}\NormalTok{(ggplot2)}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{esaminare-i-datasets-e-riportare-le-statistiche-descrittive}{%
+\subsection{1. Esaminare i datasets e riportare le statistiche
+descrittive}\label{esaminare-i-datasets-e-riportare-le-statistiche-descrittive}}
+
+in una tabella per ciascun dataset. Per le date riportare data minima e
+data massima. Fare attenzione alla possibilità di dati mancanti,
+incongruenze tra date, records ripetuti che potrebbero creare problemi
+in fase di linkage e analisi. I records con dati ripetuti o incongruenze
+tra date (eg. Data trattamento precedente alla data d'incidenza) devono
+essere segnalati nel report e poi eliminati per le analisi successive.
+
+\hypertarget{data-set-germanh.csv}{%
+\subsubsection{1.1 Data set
+``GermanH.csv''}\label{data-set-germanh.csv}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{ghr <-}\StringTok{ }\KeywordTok{read.csv2}\NormalTok{ (}\StringTok{"GermanH.csv"}\NormalTok{)}
+
+\NormalTok{ghrF <-}\StringTok{ }\NormalTok{ghr}
+
+\NormalTok{ghrF}\OperatorTok{$}\NormalTok{smoke <-}\StringTok{ }\KeywordTok{as.factor}\NormalTok{(ghrF}\OperatorTok{$}\NormalTok{smoke)}
+\NormalTok{ghrF}\OperatorTok{$}\NormalTok{sex <-}\StringTok{ }\KeywordTok{as.factor}\NormalTok{(ghrF}\OperatorTok{$}\NormalTok{sex)}
+\NormalTok{ghrF}\OperatorTok{$}\NormalTok{married <-}\StringTok{ }\KeywordTok{as.factor}\NormalTok{(ghrF}\OperatorTok{$}\NormalTok{married)}
+\NormalTok{ghrF}\OperatorTok{$}\NormalTok{kids <-}\StringTok{ }\KeywordTok{as.factor}\NormalTok{(ghrF}\OperatorTok{$}\NormalTok{kids)}
+\NormalTok{ghrF}\OperatorTok{$}\NormalTok{work <-}\StringTok{ }\KeywordTok{as.factor}\NormalTok{(ghrF}\OperatorTok{$}\NormalTok{work)}
+\NormalTok{ghrF}\OperatorTok{$}\NormalTok{education <-}\StringTok{ }\KeywordTok{as.factor}\NormalTok{(ghrF}\OperatorTok{$}\NormalTok{education)}
+
+\KeywordTok{tibble}\NormalTok{(ghrF)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # A tibble: 7,748 x 8
+##    idnum smoke sex    married kids  work  education     age
+##    <int> <fct> <fct>  <fct>   <fct> <fct> <fct>       <int>
+##  1     1 yes   Female yes     no    no    medium/high    45
+##  2     2 no    Female yes     no    no    low            44
+##  3     3 no    Female no      no    no    low            38
+##  4     4 yes   Female no      no    no    <NA>           52
+##  5     5 no    Female no      no    no    medium/high    49
+##  6     6 no    Female no      no    no    <NA>           46
+##  7     7 no    Female no      yes   no    <NA>           62
+##  8     8 yes   Female no      yes   no    <NA>           44
+##  9     9 no    Female no      no    no    <NA>           29
+## 10    10 no    Female yes     yes   no    <NA>           35
+## # ... with 7,738 more rows
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{summary}\NormalTok{(ghrF)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##      idnum      smoke          sex       married       kids       work     
+##  Min.   :   1   no :6146   Female:3871   no  :1690   no  :4260   no :7274  
+##  1st Qu.:1938   yes:1602   Male  :3877   yes :6036   yes :3474   yes: 474  
+##  Median :3874                            NA's:  22   NA's:  14             
+##  Mean   :3874                                                              
+##  3rd Qu.:5811                                                              
+##  Max.   :7748                                                              
+##        education         age        
+##  low        :6922   Min.   : 26.00  
+##  medium/high: 790   1st Qu.: 41.00  
+##  NA's       :  36   Median : 46.00  
+##                     Mean   : 48.21  
+##                     3rd Qu.: 54.00  
+##                     Max.   :108.00
+\end{verbatim}
+
+Poiché nella colonna education, che poi verrà usata per le analisi, ci
+sono valori mancanti (36 NA), andranno tolti.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{ghrF <-}\StringTok{ }\KeywordTok{na.omit}\NormalTok{(ghrF)}
+
+\KeywordTok{summary}\NormalTok{(ghrF)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##      idnum      smoke          sex       married     kids       work     
+##  Min.   :   1   no :6099   Female:3835   no :1676   no :4222   no :7206  
+##  1st Qu.:1950   yes:1577   Male  :3841   yes:6000   yes:3454   yes: 470  
+##  Median :3874                                                            
+##  Mean   :3887                                                            
+##  3rd Qu.:5823                                                            
+##  Max.   :7748                                                            
+##        education         age        
+##  low        :6888   Min.   : 26.00  
+##  medium/high: 788   1st Qu.: 41.00  
+##                     Median : 45.50  
+##                     Mean   : 48.21  
+##                     3rd Qu.: 54.00  
+##                     Max.   :108.00
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{dups<-}\StringTok{ }\NormalTok{ghrF}\OperatorTok{$}\NormalTok{idnum[}\KeywordTok{which}\NormalTok{(}\KeywordTok{duplicated}\NormalTok{(ghrF}\OperatorTok{$}\NormalTok{idnum))]}
+\NormalTok{dups}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## integer(0)
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{length}\NormalTok{(dups)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0
+\end{verbatim}
+
+Non ci sono records ripetuti in dataset GermanH, tutti gli idnums sono
+univoci.
+
+\hypertarget{data-set-cancerregister.csv}{%
+\subsubsection{1.2 Data set
+``Cancerregister.csv''}\label{data-set-cancerregister.csv}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{cr <-}\StringTok{ }\KeywordTok{read.csv2}\NormalTok{ (}\StringTok{"Cancerregister.csv"}\NormalTok{)}
+
+\NormalTok{crF <-}\StringTok{ }\NormalTok{cr}
+
+\NormalTok{crF}\OperatorTok{$}\NormalTok{Stadio <-}\StringTok{ }\KeywordTok{as.factor}\NormalTok{(crF}\OperatorTok{$}\NormalTok{Stadio)}
+\NormalTok{crF}\OperatorTok{$}\NormalTok{tipotumore <-}\StringTok{ }\KeywordTok{as.factor}\NormalTok{(crF}\OperatorTok{$}\NormalTok{tipotumore)}
+\NormalTok{crF}\OperatorTok{$}\NormalTok{geneticm <-}\StringTok{ }\KeywordTok{as.factor}\NormalTok{(crF}\OperatorTok{$}\NormalTok{geneticm)}
+\NormalTok{crF}\OperatorTok{$}\NormalTok{incidenza <-}\StringTok{ }\KeywordTok{as.Date}\NormalTok{(crF}\OperatorTok{$}\NormalTok{incidenza, }\DataTypeTok{format =} \StringTok{"%d/%m/%Y"}\NormalTok{)}
+
+\KeywordTok{tibble}\NormalTok{(crF)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # A tibble: 10,005 x 5
+##    idnum Stadio    incidenza  tipotumore geneticm
+##    <int> <fct>     <date>     <fct>      <fct>   
+##  1     3 Stadio II 1984-01-13 polmone    0       
+##  2     4 Stadio II 1984-01-13 altro      0       
+##  3     5 Stadio II 1984-01-13 seno       0       
+##  4     6 Stadio II 1984-01-12 seno       0       
+##  5     7 Stadio I  1984-01-14 altro      0       
+##  6     8 Stadio IV 1984-01-18 altro      0       
+##  7     9 Stadio II 1984-01-18 colon      0       
+##  8    10 Stadio II 1984-01-17 colon      0       
+##  9    11 Stadio II 1984-01-11 seno       0       
+## 10    13 Stadio II 1984-01-13 seno       0       
+## # ... with 9,995 more rows
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{summary}\NormalTok{(crF)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##      idnum              Stadio       incidenza            tipotumore   geneticm
+##  Min.   :    3             :   7   Min.   :1984-01-11          :   3   0:8891  
+##  1st Qu.: 2964   Stadio I  :1607   1st Qu.:1984-01-13   altro  :3250   1:1114  
+##  Median : 5984   Stadio II :5507   Median :1984-01-15   colon  :2062           
+##  Mean   : 5975   Stadio III:1197   Mean   :1984-01-15   polmone:2072           
+##  3rd Qu.: 8965   Stadio IV :1687   3rd Qu.:1984-01-18   seno   :2618           
+##  Max.   :12000                     Max.   :1984-01-20                          
+##                                    NA's   :5
+\end{verbatim}
+
+Ci sono 7 righe con stringa vuota a posto dello Stadio del tumore, 3
+righe con stringa vuota al posto del tipotumore, e 5 NA, cioè dati
+mancanti nell'incidenza. Questi records vanno tolti perché i dati sono
+essenziali per le future analisi, e comunque in totale sono 15 recrds
+rispetto al totale di 10005, ovvero 0,01\% dei dati da rimuovere.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{crF <-}\StringTok{ }\KeywordTok{na.omit}\NormalTok{(crF)}
+\NormalTok{crF <-}\StringTok{ }\NormalTok{crF[}\OperatorTok{!}\NormalTok{(}\KeywordTok{trimws}\NormalTok{(crF}\OperatorTok{$}\NormalTok{Stadio)}\OperatorTok{==}\StringTok{""}\OperatorTok{|}\StringTok{ }\KeywordTok{trimws}\NormalTok{(crF}\OperatorTok{$}\NormalTok{tipotumore)}\OperatorTok{==}\StringTok{""}\NormalTok{), ]}
+\KeywordTok{summary}\NormalTok{(crF)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##      idnum              Stadio       incidenza            tipotumore   geneticm
+##  Min.   :    3             :   0   Min.   :1984-01-11          :   0   0:8882  
+##  1st Qu.: 2965   Stadio I  :1606   1st Qu.:1984-01-13   altro  :3247   1:1114  
+##  Median : 5988   Stadio II :5506   Median :1984-01-15   colon  :2061           
+##  Mean   : 5977   Stadio III:1197   Mean   :1984-01-15   polmone:2072           
+##  3rd Qu.: 8967   Stadio IV :1687   3rd Qu.:1984-01-18   seno   :2616           
+##  Max.   :12000                     Max.   :1984-01-20
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{dups<-}\StringTok{ }\NormalTok{crF}\OperatorTok{$}\NormalTok{idnum[}\KeywordTok{which}\NormalTok{(}\KeywordTok{duplicated}\NormalTok{(crF}\OperatorTok{$}\NormalTok{idnum))]}
+\NormalTok{dups}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1]  192  363 1933
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{length}\NormalTok{(dups)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 3
+\end{verbatim}
+
+Tre record con idnum 192, 363, 1933 sono duplicati e vanno rimmossi.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{crF<-}\StringTok{ }\KeywordTok{distinct}\NormalTok{(crF)}
+\KeywordTok{tibble}\NormalTok{(crF)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # A tibble: 9,993 x 5
+##    idnum Stadio    incidenza  tipotumore geneticm
+##    <int> <fct>     <date>     <fct>      <fct>   
+##  1     3 Stadio II 1984-01-13 polmone    0       
+##  2     4 Stadio II 1984-01-13 altro      0       
+##  3     5 Stadio II 1984-01-13 seno       0       
+##  4     6 Stadio II 1984-01-12 seno       0       
+##  5     7 Stadio I  1984-01-14 altro      0       
+##  6     8 Stadio IV 1984-01-18 altro      0       
+##  7     9 Stadio II 1984-01-18 colon      0       
+##  8    10 Stadio II 1984-01-17 colon      0       
+##  9    11 Stadio II 1984-01-11 seno       0       
+## 10    13 Stadio II 1984-01-13 seno       0       
+## # ... with 9,983 more rows
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{summary}\NormalTok{(crF)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##      idnum              Stadio       incidenza            tipotumore   geneticm
+##  Min.   :    3             :   0   Min.   :1984-01-11          :   0   0:8879  
+##  1st Qu.: 2967   Stadio I  :1605   1st Qu.:1984-01-13   altro  :3247   1:1114  
+##  Median : 5989   Stadio II :5505   Median :1984-01-15   colon  :2061           
+##  Mean   : 5978   Stadio III:1197   Mean   :1984-01-15   polmone:2072           
+##  3rd Qu.: 8968   Stadio IV :1686   3rd Qu.:1984-01-18   seno   :2613           
+##  Max.   :12000                     Max.   :1984-01-20
+\end{verbatim}
+
+\hypertarget{dataset-sdo.csv}{%
+\subsubsection{1.3 Dataset ``SDO.csv''}\label{dataset-sdo.csv}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{sdo <-}\StringTok{ }\KeywordTok{read.csv2}\NormalTok{ (}\StringTok{"SDO.csv"}\NormalTok{)}
+
+\NormalTok{sdoF <-}\StringTok{ }\NormalTok{sdo}
+
+\NormalTok{sdoF}\OperatorTok{$}\NormalTok{Prestazione <-}\StringTok{ }\KeywordTok{as.factor}\NormalTok{(sdoF}\OperatorTok{$}\NormalTok{Prestazione)}
+\NormalTok{sdoF}\OperatorTok{$}\NormalTok{dataprestazione <-}\StringTok{ }\KeywordTok{as.Date}\NormalTok{(sdoF}\OperatorTok{$}\NormalTok{dataprestazione, }\DataTypeTok{format =} \StringTok{"%d/%m/%Y"}\NormalTok{)}
+\NormalTok{sdoF}\OperatorTok{$}\NormalTok{dimissione <-}\StringTok{ }\KeywordTok{as.Date}\NormalTok{(sdoF}\OperatorTok{$}\NormalTok{dimissione, }\DataTypeTok{format =} \StringTok{"%d/%m/%Y"}\NormalTok{)}
+
+\KeywordTok{tibble}\NormalTok{(sdoF)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # A tibble: 10,002 x 5
+##    idnum Prestazione    dataprestazione dimissione ospedale
+##    <int> <fct>          <date>          <date>        <int>
+##  1  1933 chirurgica     1984-04-07      1984-07-19        8
+##  2 10076 chemioterapica 1984-03-31      1984-07-08        8
+##  3 10096 chirurgica     1984-02-25      1984-07-16        2
+##  4    79 chirurgica     1984-05-12      1984-08-28        4
+##  5 10475 chirurgica     1984-04-13      1984-08-17        8
+##  6 11010 chirurgica     1984-03-06      1984-07-23        5
+##  7  4402 chemioterapica 1984-02-29      NA                8
+##  8  1788 chemioterapica 1984-03-30      1984-07-15        3
+##  9 11318 chirurgica     1984-02-11      1984-06-28        3
+## 10  3164 chemioterapica 1984-05-17      1984-07-13        9
+## # ... with 9,992 more rows
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{summary}\NormalTok{(sdoF)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##      idnum               Prestazione   dataprestazione     
+##  Min.   :    3   chemioterapica:1988   Min.   :1984-01-22  
+##  1st Qu.: 2966   chirurgica    :3318   1st Qu.:1984-02-19  
+##  Median : 5986   radioterapica :4696   Median :1984-03-08  
+##  Mean   : 5976                         Mean   :1984-03-19  
+##  3rd Qu.: 8966                         3rd Qu.:1984-04-09  
+##  Max.   :12000                         Max.   :1984-10-07  
+##                                        NA's   :1           
+##    dimissione            ospedale    
+##  Min.   :1984-06-22   Min.   :1.000  
+##  1st Qu.:1984-07-17   1st Qu.:3.000  
+##  Median :1984-08-02   Median :5.000  
+##  Mean   :1984-08-12   Mean   :5.007  
+##  3rd Qu.:1984-09-01   3rd Qu.:7.000  
+##  Max.   :1985-02-12   Max.   :9.000  
+##  NA's   :3
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{sdof2 <-}\StringTok{ }\NormalTok{sdoF}\OperatorTok{%>%}\StringTok{ }\KeywordTok{group_by}\NormalTok{(ospedale) }\OperatorTok{%>%}\StringTok{ }\KeywordTok{summarise}\NormalTok{(}\KeywordTok{n}\NormalTok{())}
+\NormalTok{sdof2}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # A tibble: 9 x 2
+##   ospedale `n()`
+## *    <int> <int>
+## 1        1  1150
+## 2        2  1085
+## 3        3  1088
+## 4        4  1098
+## 5        5  1107
+## 6        6  1110
+## 7        7  1126
+## 8        8  1119
+## 9        9  1119
+\end{verbatim}
+
+Analisi descrittiva dimostra che c'è un NA nella colonna dataprestazione
+e 3 NA nella colonna dimissione che vanno rimmossi.Saranno anche
+rimmossi eventuali duplicati.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{sdoF <-}\StringTok{ }\KeywordTok{na.omit}\NormalTok{(sdoF)}
+\NormalTok{sdoF <-}\StringTok{ }\KeywordTok{distinct}\NormalTok{(sdoF)}
+\KeywordTok{tibble}\NormalTok{(sdoF)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # A tibble: 9,998 x 5
+##    idnum Prestazione    dataprestazione dimissione ospedale
+##    <int> <fct>          <date>          <date>        <int>
+##  1  1933 chirurgica     1984-04-07      1984-07-19        8
+##  2 10076 chemioterapica 1984-03-31      1984-07-08        8
+##  3 10096 chirurgica     1984-02-25      1984-07-16        2
+##  4    79 chirurgica     1984-05-12      1984-08-28        4
+##  5 10475 chirurgica     1984-04-13      1984-08-17        8
+##  6 11010 chirurgica     1984-03-06      1984-07-23        5
+##  7  1788 chemioterapica 1984-03-30      1984-07-15        3
+##  8 11318 chirurgica     1984-02-11      1984-06-28        3
+##  9  3164 chemioterapica 1984-05-17      1984-07-13        9
+## 10  8283 chemioterapica 1984-02-06      1984-07-14        3
+## # ... with 9,988 more rows
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{summary}\NormalTok{(sdoF)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##      idnum               Prestazione   dataprestazione     
+##  Min.   :    3   chemioterapica:1986   Min.   :1984-01-22  
+##  1st Qu.: 2967   chirurgica    :3317   1st Qu.:1984-02-19  
+##  Median : 5986   radioterapica :4695   Median :1984-03-08  
+##  Mean   : 5977                         Mean   :1984-03-19  
+##  3rd Qu.: 8967                         3rd Qu.:1984-04-09  
+##  Max.   :12000                         Max.   :1984-10-07  
+##    dimissione            ospedale    
+##  Min.   :1984-06-22   Min.   :1.000  
+##  1st Qu.:1984-07-17   1st Qu.:3.000  
+##  Median :1984-08-02   Median :5.000  
+##  Mean   :1984-08-12   Mean   :5.006  
+##  3rd Qu.:1984-09-01   3rd Qu.:7.000  
+##  Max.   :1985-02-12   Max.   :9.000
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{toRemove <-}\StringTok{ }\NormalTok{sdoF[(sdoF}\OperatorTok{$}\NormalTok{dataprestazione }\OperatorTok{>}\StringTok{ }\NormalTok{sdoF}\OperatorTok{$}\NormalTok{dimissione ), ]}
+\NormalTok{toRemove}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##      idnum    Prestazione dataprestazione dimissione ospedale
+## 744   5377  radioterapica      1984-07-22 1984-07-21        6
+## 807   4456     chirurgica      1984-07-15 1984-07-01        3
+## 1055  2813  radioterapica      1984-09-19 1984-09-13        3
+## 1101   245 chemioterapica      1984-07-19 1984-07-17        1
+## 1127  8468 chemioterapica      1984-07-15 1984-07-01        9
+## 1150  2336     chirurgica      1984-09-05 1984-07-18        2
+## 2156 10093  radioterapica      1984-08-23 1984-07-10        1
+## 2186 11996     chirurgica      1984-07-12 1984-07-06        5
+## 2965  5943     chirurgica      1984-07-20 1984-07-13        5
+## 3052  2243 chemioterapica      1984-07-24 1984-07-20        7
+## 3094   334     chirurgica      1984-07-20 1984-07-06        1
+## 3114 11379     chirurgica      1984-07-17 1984-07-11        2
+## 3301  1776 chemioterapica      1984-06-25 1984-06-22        1
+## 3427  6287  radioterapica      1984-08-08 1984-07-04        5
+## 3724  4986  radioterapica      1984-08-11 1984-07-02        9
+## 3838  1980  radioterapica      1984-07-30 1984-07-20        5
+## 3914  1616     chirurgica      1984-08-16 1984-07-25        8
+## 3978  4764  radioterapica      1984-08-12 1984-07-21        4
+## 5007 10588  radioterapica      1984-08-10 1984-07-07        2
+## 5093  5917  radioterapica      1984-07-28 1984-07-20        9
+## 5158  1252  radioterapica      1984-08-03 1984-08-02        8
+## 5264  7673     chirurgica      1984-08-09 1984-07-30        6
+## 5370  4631     chirurgica      1984-08-08 1984-07-05        1
+## 5702   180  radioterapica      1984-08-01 1984-07-01        7
+## 5915  9429  radioterapica      1984-08-27 1984-08-14        4
+## 6631 10270  radioterapica      1984-07-20 1984-07-07        8
+## 6688  1498     chirurgica      1984-07-18 1984-07-11        9
+## 6823  7500     chirurgica      1984-08-26 1984-07-16        2
+## 7357  4379     chirurgica      1984-08-06 1984-07-22        8
+## 7838  8083  radioterapica      1984-10-05 1984-07-31        9
+## 7926  1108  radioterapica      1984-07-07 1984-07-02        4
+## 8030  7545  radioterapica      1984-09-06 1984-07-04        1
+## 8066 10368 chemioterapica      1984-07-24 1984-07-11        2
+## 8069  5255  radioterapica      1984-07-25 1984-07-24        4
+## 8480  2046  radioterapica      1984-07-10 1984-06-29        6
+## 8517  5358  radioterapica      1984-08-27 1984-07-26        2
+## 8528 11020     chirurgica      1984-07-12 1984-07-08        7
+## 8557  3647  radioterapica      1984-08-25 1984-07-19        7
+## 8618  9620     chirurgica      1984-07-25 1984-07-11        6
+## 8648  9590 chemioterapica      1984-07-17 1984-07-11        1
+## 8735  3923     chirurgica      1984-07-30 1984-07-09        7
+## 9066 10400     chirurgica      1984-08-10 1984-07-28        1
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{tibble}\NormalTok{(toRemove)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # A tibble: 42 x 5
+##    idnum Prestazione    dataprestazione dimissione ospedale
+##    <int> <fct>          <date>          <date>        <int>
+##  1  5377 radioterapica  1984-07-22      1984-07-21        6
+##  2  4456 chirurgica     1984-07-15      1984-07-01        3
+##  3  2813 radioterapica  1984-09-19      1984-09-13        3
+##  4   245 chemioterapica 1984-07-19      1984-07-17        1
+##  5  8468 chemioterapica 1984-07-15      1984-07-01        9
+##  6  2336 chirurgica     1984-09-05      1984-07-18        2
+##  7 10093 radioterapica  1984-08-23      1984-07-10        1
+##  8 11996 chirurgica     1984-07-12      1984-07-06        5
+##  9  5943 chirurgica     1984-07-20      1984-07-13        5
+## 10  2243 chemioterapica 1984-07-24      1984-07-20        7
+## # ... with 32 more rows
+\end{verbatim}
+
+42 record hanno date inconguenti, ovvero i soggetti sarebbero stati
+dimessi prima di essere sottoposti alle terapie, e quindi questi record
+vanno eliminati.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{sdoF <-}\StringTok{ }\NormalTok{sdoF[}\OperatorTok{!}\NormalTok{(sdoF}\OperatorTok{$}\NormalTok{dataprestazione }\OperatorTok{>}\StringTok{ }\NormalTok{sdoF}\OperatorTok{$}\NormalTok{dimissione ), ]}
+\KeywordTok{tibble}\NormalTok{(sdoF)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # A tibble: 9,956 x 5
+##    idnum Prestazione    dataprestazione dimissione ospedale
+##    <int> <fct>          <date>          <date>        <int>
+##  1  1933 chirurgica     1984-04-07      1984-07-19        8
+##  2 10076 chemioterapica 1984-03-31      1984-07-08        8
+##  3 10096 chirurgica     1984-02-25      1984-07-16        2
+##  4    79 chirurgica     1984-05-12      1984-08-28        4
+##  5 10475 chirurgica     1984-04-13      1984-08-17        8
+##  6 11010 chirurgica     1984-03-06      1984-07-23        5
+##  7  1788 chemioterapica 1984-03-30      1984-07-15        3
+##  8 11318 chirurgica     1984-02-11      1984-06-28        3
+##  9  3164 chemioterapica 1984-05-17      1984-07-13        9
+## 10  8283 chemioterapica 1984-02-06      1984-07-14        3
+## # ... with 9,946 more rows
+\end{verbatim}
+
+\hypertarget{dataset-deathregister.csv}{%
+\subsubsection{1.4 Dataset
+``Deathregister.csv''}\label{dataset-deathregister.csv}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{dreg <-}\StringTok{ }\KeywordTok{read.csv2}\NormalTok{ (}\StringTok{"Deathregister.csv"}\NormalTok{)}
+
+\NormalTok{dregF <-}\StringTok{ }\NormalTok{dreg}
+\NormalTok{dregF}\OperatorTok{$}\NormalTok{dead <-}\StringTok{ }\KeywordTok{as.factor}\NormalTok{(dregF}\OperatorTok{$}\NormalTok{dead)}
+\NormalTok{dregF}\OperatorTok{$}\NormalTok{enddate <-}\StringTok{ }\KeywordTok{as.Date}\NormalTok{(dregF}\OperatorTok{$}\NormalTok{enddate, }\DataTypeTok{format =} \StringTok{"%Y-%m-%d"}\NormalTok{)}
+
+
+\KeywordTok{tibble}\NormalTok{(dregF)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # A tibble: 7,748 x 3
+##    idnum dead  enddate   
+##    <int> <fct> <date>    
+##  1     1 0     1988-12-31
+##  2     2 0     1988-12-31
+##  3     3 0     1988-12-30
+##  4     4 1     1985-12-17
+##  5     5 0     1987-08-07
+##  6     6 0     1988-10-25
+##  7     7 1     1985-08-03
+##  8     8 1     1985-01-08
+##  9     9 1     1986-08-25
+## 10    10 1     1988-10-14
+## # ... with 7,738 more rows
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{summary}\NormalTok{(dregF)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##      idnum      dead        enddate          
+##  Min.   :   1   0:5130   Min.   :1984-06-29  
+##  1st Qu.:1938   1:2618   1st Qu.:1985-11-12  
+##  Median :3874            Median :1987-05-27  
+##  Mean   :3874            Mean   :1987-03-31  
+##  3rd Qu.:5811            3rd Qu.:1988-11-05  
+##  Max.   :7748            Max.   :1988-12-31
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{dups<-}\StringTok{ }\NormalTok{dregF}\OperatorTok{$}\NormalTok{idnum[}\KeywordTok{which}\NormalTok{(}\KeywordTok{duplicated}\NormalTok{(dregF}\OperatorTok{$}\NormalTok{idnum))]}
+\NormalTok{dups}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## integer(0)
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{length}\NormalTok{(dups)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0
+\end{verbatim}
+
+\hypertarget{indicatore-intervento-chirurgico-di-asportazione-del-tumore-al-seno-entro-60-giorni-dalla-data-di-diagnosi}{%
+\subsection{2. Indicatore `Intervento chirurgico di asportazione del
+tumore al seno entro 60 giorni dalla data di
+diagnosi'}\label{indicatore-intervento-chirurgico-di-asportazione-del-tumore-al-seno-entro-60-giorni-dalla-data-di-diagnosi}}
+
+Effettuare il record-linkage con lo scopo di costruire l'indicatore
+`Intervento chirurgico di asportazione del tumore al seno entro 60
+giorni dalla data di diagnosi' su base mensile per i casi incidenti nel
+mese di gennaio 1984.
+
+Denominatore: tutti i soggetti di sesso femminile con tumore al seno
+insorto tra 01/01/1984 e 31/01/1984, in stadio I o II, che hanno subito
+un intervento chirurgico
+
+Numeratore: tutti i soggetti al denominatore con intervallo tra la data
+d'incidenza e la data dell'intervento ≤60 giorni
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{join2 <-}\StringTok{ }\KeywordTok{inner_join}\NormalTok{(crF, sdoF, }\DataTypeTok{by =} \StringTok{"idnum"}\NormalTok{)}
+\KeywordTok{nrow}\NormalTok{(join2)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 9947
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{join2 <-}\StringTok{ }\NormalTok{join2 [}\OperatorTok{!}\NormalTok{(join2}\OperatorTok{$}\NormalTok{dimissione }\OperatorTok{<}\StringTok{ }\NormalTok{join2}\OperatorTok{$}\NormalTok{incidenza }\OperatorTok{|}\StringTok{ }\NormalTok{join2}\OperatorTok{$}\NormalTok{dataprestazione }\OperatorTok{<}\StringTok{ }\NormalTok{join2}\OperatorTok{$}\NormalTok{incidenza),]}
+\KeywordTok{nrow}\NormalTok{(join2)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 9947
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{join2 <-}\StringTok{ }\KeywordTok{inner_join}\NormalTok{(join2, ghrF, }\DataTypeTok{by =} \StringTok{"idnum"}\NormalTok{) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{filter}\NormalTok{(incidenza }\OperatorTok{>=}\StringTok{  }\KeywordTok{as.Date}\NormalTok{(}\StringTok{"01/01/1984"}\NormalTok{, }\StringTok{"%d/%m/%Y"}\NormalTok{) }\OperatorTok{&}\StringTok{ }\NormalTok{incidenza }\OperatorTok{<=}\StringTok{  }\KeywordTok{as.Date}\NormalTok{(}\StringTok{"31/01/1984"}\NormalTok{, }\StringTok{"%d/%m/%Y"}\NormalTok{)) }\OperatorTok{%>%}\StringTok{     }
+\StringTok{  }\KeywordTok{filter}\NormalTok{(sex }\OperatorTok{==}\StringTok{ "Female"}\NormalTok{) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{filter}\NormalTok{ (tipotumore }\OperatorTok{==}\StringTok{ "seno"}\NormalTok{) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{filter}\NormalTok{(Stadio }\OperatorTok{==}\StringTok{ "Stadio I"} \OperatorTok{|}\StringTok{ }\NormalTok{Stadio }\OperatorTok{==}\StringTok{ "Stadio II"}\NormalTok{ )}\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{filter}\NormalTok{ (Prestazione }\OperatorTok{==}\StringTok{ "chirurgica"}\NormalTok{) }
+
+\KeywordTok{tibble}\NormalTok{(join2)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # A tibble: 311 x 16
+##    idnum Stadio incidenza  tipotumore geneticm Prestazione dataprestazione
+##    <int> <fct>  <date>     <fct>      <fct>    <fct>       <date>         
+##  1    21 Stadi~ 1984-01-14 seno       0        chirurgica  1984-03-11     
+##  2    24 Stadi~ 1984-01-14 seno       0        chirurgica  1984-04-19     
+##  3    30 Stadi~ 1984-01-11 seno       0        chirurgica  1984-02-18     
+##  4    56 Stadi~ 1984-01-13 seno       1        chirurgica  1984-02-26     
+##  5    68 Stadi~ 1984-01-18 seno       0        chirurgica  1984-07-03     
+##  6    76 Stadi~ 1984-01-13 seno       0        chirurgica  1984-05-02     
+##  7    79 Stadi~ 1984-01-11 seno       0        chirurgica  1984-05-12     
+##  8    85 Stadi~ 1984-01-13 seno       1        chirurgica  1984-02-23     
+##  9    86 Stadi~ 1984-01-18 seno       0        chirurgica  1984-06-08     
+## 10    95 Stadi~ 1984-01-13 seno       1        chirurgica  1984-02-22     
+## # ... with 301 more rows, and 9 more variables: dimissione <date>,
+## #   ospedale <int>, smoke <fct>, sex <fct>, married <fct>, kids <fct>,
+## #   work <fct>, education <fct>, age <int>
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{denominatore <-}\StringTok{ }\KeywordTok{nrow}\NormalTok{(join2)}
+\NormalTok{denominatore}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 311
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{join2}\OperatorTok{$}\NormalTok{tempoIntervento <-}\StringTok{ }\NormalTok{join2}\OperatorTok{$}\NormalTok{dataprestazione }\OperatorTok{-}\StringTok{ }\NormalTok{join2}\OperatorTok{$}\NormalTok{incidenza }
+
+\NormalTok{numeratore <-}\StringTok{ }\KeywordTok{nrow}\NormalTok{( join2 }\OperatorTok{%>%}\StringTok{ }\KeywordTok{filter}\NormalTok{(tempoIntervento }\OperatorTok{<=}\StringTok{ }\DecValTok{60}\NormalTok{)) }
+\NormalTok{numeratore}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 172
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{indicatoreTot =}\StringTok{ }\NormalTok{numeratore}\OperatorTok{/}\NormalTok{denominatore}
+\NormalTok{indicatoreTot}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0.5530547
+\end{verbatim}
+
+\hypertarget{indicatore-per-ospedale}{%
+\subsection{3. Indicatore per ospedale}\label{indicatore-per-ospedale}}
+
+Calcolare l'indicatore `Intervento chirurgico di asportazione del tumore
+al seno entro 60 giorni dalla data di diagnosi' per ospedale e darne
+rappresentazione grafica, includendo come valore di riferimento nel
+grafico l'indicatore calcolato sull'intero dataset. Per esempi relativi
+alla rappresentazione grafica fare riferimento al sito PNE o siti
+analoghi trattati a lezione.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{join3 <-}\StringTok{ }\KeywordTok{inner_join}\NormalTok{(crF, sdoF, }\DataTypeTok{by =} \StringTok{"idnum"}\NormalTok{)}
+
+\NormalTok{join3}\OperatorTok{$}\NormalTok{tempoIntervento <-}\StringTok{ }\NormalTok{join3}\OperatorTok{$}\NormalTok{dataprestazione }\OperatorTok{-}\StringTok{ }\NormalTok{join3}\OperatorTok{$}\NormalTok{incidenza }
+
+
+\NormalTok{join3 <-}\StringTok{ }\KeywordTok{inner_join}\NormalTok{(join3, ghrF, }\DataTypeTok{by =} \StringTok{"idnum"}\NormalTok{) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{filter}\NormalTok{(incidenza }\OperatorTok{>=}\StringTok{  }\KeywordTok{as.Date}\NormalTok{(}\StringTok{"01/01/1984"}\NormalTok{, }\StringTok{"%d/%m/%Y"}\NormalTok{) }\OperatorTok{&}\StringTok{ }\NormalTok{incidenza }\OperatorTok{<=}\StringTok{  }\KeywordTok{as.Date}\NormalTok{(}\StringTok{"31/01/1984"}\NormalTok{, }\StringTok{"%d/%m/%Y"}\NormalTok{)) }\OperatorTok{%>%}\StringTok{     }
+\StringTok{  }\KeywordTok{filter}\NormalTok{(sex }\OperatorTok{==}\StringTok{ "Female"}\NormalTok{) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{filter}\NormalTok{ (tipotumore }\OperatorTok{==}\StringTok{ "seno"}\NormalTok{) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{filter}\NormalTok{(Stadio }\OperatorTok{==}\StringTok{ "Stadio I"} \OperatorTok{|}\StringTok{ }\NormalTok{Stadio }\OperatorTok{==}\StringTok{ "Stadio II"}\NormalTok{ )}\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{filter}\NormalTok{ (Prestazione }\OperatorTok{==}\StringTok{ "chirurgica"}\NormalTok{) }
+
+\NormalTok{join3}\OperatorTok{$}\NormalTok{status <-}\StringTok{ }\KeywordTok{ifelse}\NormalTok{(join3}\OperatorTok{$}\NormalTok{tempoIntervento }\OperatorTok{<=}\StringTok{ }\DecValTok{60}\NormalTok{, }\DecValTok{1}\NormalTok{, }\DecValTok{0}\NormalTok{) }
+
+\KeywordTok{head}\NormalTok{(join3)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##   idnum    Stadio  incidenza tipotumore geneticm Prestazione dataprestazione
+## 1    21 Stadio II 1984-01-14       seno        0  chirurgica      1984-03-11
+## 2    24 Stadio II 1984-01-14       seno        0  chirurgica      1984-04-19
+## 3    30 Stadio II 1984-01-11       seno        0  chirurgica      1984-02-18
+## 4    56 Stadio II 1984-01-13       seno        1  chirurgica      1984-02-26
+## 5    68 Stadio II 1984-01-18       seno        0  chirurgica      1984-07-03
+## 6    76  Stadio I 1984-01-13       seno        0  chirurgica      1984-05-02
+##   dimissione ospedale tempoIntervento smoke    sex married kids work
+## 1 1984-08-25        2         57 days    no Female     yes  yes   no
+## 2 1984-07-25        4         96 days   yes Female     yes   no   no
+## 3 1984-09-23        8         38 days    no Female     yes  yes   no
+## 4 1984-09-06        4         44 days    no Female     yes  yes  yes
+## 5 1984-08-02        6        167 days    no Female     yes  yes   no
+## 6 1984-09-24        3        110 days    no Female     yes   no   no
+##     education age status
+## 1 medium/high  45      1
+## 2         low  81      0
+## 3         low  71      1
+## 4         low  40      1
+## 5         low  35      0
+## 6         low  33      0
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{TTS <-}\StringTok{ }\KeywordTok{table}\NormalTok{(join3}\OperatorTok{$}\NormalTok{status,join3}\OperatorTok{$}\NormalTok{ospedale)}
+\NormalTok{TTS}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##    
+##      1  2  3  4  5  6  7  8  9
+##   0 21 10 17 22 10 15 11 16 17
+##   1 18 18 16 24 13 18 18 27 20
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{prop.table}\NormalTok{(TTS,}\DecValTok{2}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##    
+##             1         2         3         4         5         6         7
+##   0 0.5384615 0.3571429 0.5151515 0.4782609 0.4347826 0.4545455 0.3793103
+##   1 0.4615385 0.6428571 0.4848485 0.5217391 0.5652174 0.5454545 0.6206897
+##    
+##             8         9
+##   0 0.3720930 0.4594595
+##   1 0.6279070 0.5405405
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{TTS}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##    
+##      1  2  3  4  5  6  7  8  9
+##   0 21 10 17 22 10 15 11 16 17
+##   1 18 18 16 24 13 18 18 27 20
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{prop.test}\NormalTok{(TTS[}\DecValTok{2}\NormalTok{,}\DecValTok{1}\NormalTok{],TTS[}\DecValTok{1}\NormalTok{,}\DecValTok{1}\NormalTok{]}\OperatorTok{+}\NormalTok{TTS[}\DecValTok{2}\NormalTok{,}\DecValTok{1}\NormalTok{])}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+##  1-sample proportions test with continuity correction
+## 
+## data:  TTS[2, 1] out of TTS[1, 1] + TTS[2, 1], null probability 0.5
+## X-squared = 0.10256, df = 1, p-value = 0.7488
+## alternative hypothesis: true p is not equal to 0.5
+## 95 percent confidence interval:
+##  0.3043127 0.6262009
+## sample estimates:
+##         p 
+## 0.4615385
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{lower <-}\StringTok{ }\KeywordTok{c}\NormalTok{()}
+\NormalTok{upper <-}\StringTok{ }\KeywordTok{c}\NormalTok{()}
+\ControlFlowTok{for}\NormalTok{ (i  }\ControlFlowTok{in}\NormalTok{ (}\DecValTok{1}\OperatorTok{:}\NormalTok{(}\KeywordTok{length}\NormalTok{(TTS)}\OperatorTok{/}\DecValTok{2}\NormalTok{))) \{}
+\NormalTok{  ci <-}\StringTok{ }\KeywordTok{prop.test}\NormalTok{(TTS[}\DecValTok{2}\NormalTok{, i], TTS[}\DecValTok{1}\NormalTok{, i]}\OperatorTok{+}\NormalTok{TTS[}\DecValTok{2}\NormalTok{,i])}\OperatorTok{$}\NormalTok{conf.int}
+\NormalTok{  lower <-}\StringTok{ }\KeywordTok{append}\NormalTok{(lower, ci[}\DecValTok{1}\NormalTok{])}
+\NormalTok{  upper <-}\StringTok{ }\KeywordTok{append}\NormalTok{(upper, ci[}\DecValTok{2}\NormalTok{])}
+\NormalTok{\}}
+
+\NormalTok{interventi_perc <-}\StringTok{ }\KeywordTok{prop.table}\NormalTok{(}\KeywordTok{table}\NormalTok{(join3}\OperatorTok{$}\NormalTok{status,join3}\OperatorTok{$}\NormalTok{ospedale), }\DecValTok{2}\NormalTok{)[}\DecValTok{2}\NormalTok{,]}
+\NormalTok{ospedale <-}\StringTok{ }\KeywordTok{names}\NormalTok{(interventi_perc)}
+\NormalTok{num<-}\KeywordTok{as.numeric}\NormalTok{(}\KeywordTok{table}\NormalTok{(join3}\OperatorTok{$}\NormalTok{ospedale))}
+
+\NormalTok{df <-}\StringTok{ }\KeywordTok{data.frame}\NormalTok{(ospedale, num,interventi_perc, lower, upper)}
+
+\KeywordTok{ggplot}\NormalTok{(df) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom_point}\NormalTok{( }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x=}\NormalTok{ospedale, }\DataTypeTok{y=}\NormalTok{interventi_perc,}\DataTypeTok{size=}\NormalTok{num), }\DataTypeTok{stat=}\StringTok{"identity"}\NormalTok{, }\DataTypeTok{alpha=}\FloatTok{0.7}\NormalTok{) }\OperatorTok{+}\StringTok{ }\KeywordTok{ylab}\NormalTok{(}\StringTok{"intervento a meno di 60 gg"}\NormalTok{)}\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom_errorbar}\NormalTok{( }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x=}\NormalTok{ospedale, }\DataTypeTok{ymin=}\NormalTok{lower, }\DataTypeTok{ymax=}\NormalTok{upper), }\DataTypeTok{width=}\FloatTok{0.4}\NormalTok{, }\DataTypeTok{colour=}\StringTok{"black"}\NormalTok{, }\DataTypeTok{alpha=}\FloatTok{0.9}\NormalTok{, }\DataTypeTok{size=}\FloatTok{0.9}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{geom_hline}\NormalTok{(}\DataTypeTok{yintercept=}\NormalTok{indicatoreTot)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{SStanisic_800409_Progetto_files/figure-latex/unnamed-chunk-17-1.pdf}
+
+\hypertarget{associazione-tra-il-livello-di-educazione-e-indicatore}{%
+\subsection{4. Associazione tra il livello di educazione e
+indicatore}\label{associazione-tra-il-livello-di-educazione-e-indicatore}}
+
+Utilizzare il dataset ottenuto per valutare l'associazione a livello
+individuale tra il livello di educazione ed il valore dell'indicatore
+`Intervento chirurgico di asportazione del tumore al seno entro 60
+giorni dalla data di diagnosi'.
+
+Quale misura di effetto è possibile stimare?
+
+è possibile stimare l'OR.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{library}\NormalTok{(epitools)}
+\KeywordTok{library}\NormalTok{(Epi)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning: package 'Epi' was built under R version 4.0.4
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{join4 <-}\StringTok{ }\NormalTok{join3}
+
+\NormalTok{join4}\OperatorTok{$}\NormalTok{status <-}\StringTok{ }\KeywordTok{as.factor}\NormalTok{(join4}\OperatorTok{$}\NormalTok{status)}
+
+\KeywordTok{epitab}\NormalTok{(join4}\OperatorTok{$}\NormalTok{education,join4}\OperatorTok{$}\NormalTok{status,}\DataTypeTok{method =} \KeywordTok{c}\NormalTok{( }\StringTok{"oddsratio"}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## $tab
+##              Outcome
+## Predictor       0        p0   1        p1 oddsratio     lower    upper p.value
+##   low         120 0.8633094 149 0.8662791 1.0000000        NA       NA      NA
+##   medium/high  19 0.1366906  23 0.1337209 0.9749205 0.5072007 1.873952       1
+## 
+## $measure
+## [1] "wald"
+## 
+## $conf.level
+## [1] 0.95
+## 
+## $pvalue
+## [1] "fisher.exact"
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{twoby2}\NormalTok{(join4}\OperatorTok{$}\NormalTok{education,join4}\OperatorTok{$}\NormalTok{status)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 2 by 2 table analysis: 
+## ------------------------------------------------------ 
+## Outcome   : 0 
+## Comparing : low vs. medium/high 
+## 
+##               0   1    P(0) 95% conf. interval
+## low         120 149  0.4461    0.3877   0.5060
+## medium/high  19  23  0.4524    0.3103   0.6027
+## 
+##                                     95% conf. interval
+##              Relative Risk:  0.9861    0.6891   1.4112
+##          Sample Odds Ratio:  0.9749    0.5072   1.8740
+## Conditional MLE Odds Ratio:  0.9750    0.4824   1.9903
+##     Probability difference: -0.0063   -0.1654   0.1461
+## 
+##              Exact P-value: 1.0000 
+##         Asymptotic P-value: 0.9393 
+## ------------------------------------------------------
+\end{verbatim}
+
+Calcolate ed interpretate tale misura di effetto grezza. Riportare anche
+la relativa tabella di contingenza.
+
+** Tabella di contigenza**
+
+\begin{longtable}[]{@{}llll@{}}
+\toprule
+EDUCATION & OUTCOME 0 & OUTCOME 1 & TOT.\tabularnewline
+\midrule
+\endhead
+low & 120 & 149 & 269\tabularnewline
+medium/high & 19 & 23 & 42\tabularnewline
+& & &\tabularnewline
+----------------- & --------------- & --------------- &
+--------------\tabularnewline
+TOT. & 139 & 172 & 311\tabularnewline
+\bottomrule
+\end{longtable}
+
+Sample Odds Ratio: 0.9749
+
+I soggetti con la formazione medio/alta hanno 0.9749 l'odds dei soggeti
+com la formazione bassa di avere l'intervento chirurgico al seno entro
+60 giorni dalla diagnosi. L'intervallo di confidenza, però, comprende
+l'uno e quindi l'OR non è statisticamente significativo. Quindi, si può
+concludere che la probabilità di avere un intervento al seno entro 60
+giorni dalla diagnosi del tumore non dipende dalla formazione.
+
+\end{document}

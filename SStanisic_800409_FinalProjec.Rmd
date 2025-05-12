@@ -1,0 +1,918 @@
+---
+title: "Big Data in Public Health - Progetto Finale"
+author: "Sanja Stanisic, Universita' degli Studi di Milano Bicocca, CdLM Data Science, n. 800409"
+date: "21. May 2021."
+output:
+  html_document:
+    df_print: paged
+    toc: yes
+    toc_depth: '5'
+  pdf_document:
+    toc: yes
+    toc_depth: 5
+  ioslides_presentation:
+    css:
+    - css/fonts.css
+    - css/custom.css
+    - css/title-slide.css
+    - css/slide-background.css
+    includes:
+      before_body: html/title.html
+    toc: yes
+    transition: default
+    widescreen: yes
+  beamer_presentation:
+    colortheme: lily
+    fig_caption: no
+    fig_height: 6
+    fig_width: 7
+    fonttheme: structurebold
+    theme: Hannover
+    toc: yes
+  word_document:
+    toc: yes
+    toc_depth: '5'
+  prettydoc::html_pretty:
+    df_print: paged
+    highlight: vignette
+    theme: architect
+    toc: yes
+    toc_depth: 5
+  slidy_presentation:
+    highlight: default
+course: Big Data in Public Health
+---
+
+```{r setup, include=FALSE}
+# Use 'verbatim = TRUE' as chunk option to show chunk code as is
+if(require(knitr)==FALSE) install.packages("knitr")
+hook_source_def = knit_hooks$get('source')
+knit_hooks$set(source = function(x, options){
+  if (!is.null(options$verbatim) && options$verbatim){
+    opts = gsub(",\\s*verbatim\\s*=\\s*TRUE\\s*", "", options$params.src)
+    bef = sprintf('\n\n    ```{r %s}\n', opts, "\n")
+    stringr::str_c(bef, paste(knitr:::indent_block(x, "    "), collapse = '\n'), "\n    ```\n")
+  } else {
+     hook_source_def(x, options)
+  }
+})
+
+```
+
+```{r echo=TRUE, eval = TRUE, message=FALSE, warning=FALSE, include=FALSE}
+library(tidyr)
+library(dplyr)
+library(data.table)
+
+library(ggplot2)
+
+library(epitools)
+library(Epi)
+library(epiR)
+
+library(survival)
+library(survminer)
+
+```
+
+
+## 1.  Statistiche descrittive e preprocessamento dati
+
+**Esaminare i datasets e riportare le statistiche descrittive in una tabella per ciascun dataset.** 
+
+
+### 1.1 Dataset "GermanH.csv"
+
+```{r, echo=TRUE, eval  = TRUE,message=FALSE, warning=FALSE}
+
+ghr <- read.csv2 ("GermanH.csv")
+
+ghrF <- ghr
+
+ghrF$smoke <- as.factor(ghrF$smoke)
+ghrF$sex <- as.factor(ghrF$sex)
+ghrF$married <- as.factor(ghrF$married)
+ghrF$kids <- as.factor(ghrF$kids)
+ghrF$work <- factor(ghr$work, levels = c("yes", "no"))
+ghrF$education <- factor(ghr$education, levels = c("medium/high", "low"))
+
+
+#tibble(ghrF)
+summary(ghrF)
+
+```
+Sui 7748 record ci sono 36 dati mancati nell'education, 22 nello stato civile e 14 nell'attributo relativo al fatto di avere o non avere figli. Per analisi successive si possono rimuovere questi record, perché dato che rappresentano meno di 1% dei record (più precisamente 0.93%), questo non potrà influenzare i risultati delle future analisi.  
+
+Le variabili vanno fattorizzate, e per le variabili **'work'** e **'education'** verà precisato il livello - dato che queste variabili saranno usate per le analisi successive tramite la funzione **epi2by2** che esige avere nella tabbella di contingenza in posizione (1,1) l'outcome positivo e l'esposizione positiva. 
+
+```{r, echo=TRUE, eval=TRUE, message=FALSE}
+
+ghr <- na.omit(ghr) 
+#tibble(ghr)
+#summary(ghr)
+
+
+ghrF <-na.omit(ghrF)
+tibble(ghrF)
+summary(ghrF)
+
+
+```
+
+
+
+```{r, echo = TRUE, eval=TRUE, message=FALSE, warning=FALSE}
+
+#Verifica duplicati
+dups<- ghrF$idnum[which(duplicated(ghrF$idnum))]
+dups
+length(dups)
+```
+Non ci sono records ripetuti in dataset GermanH, tutti gli idnums sono univoci. 
+
+### 1.2 Data set "Cancerregister.csv"
+
+```{r, echo=TRUE, eval=TRUE, message=FALSE}
+
+cr <- read.csv2 ("Cancerregister.csv")
+cr$incidenza <- as.Date(cr$incidenza, format = "%d/%m/%Y")
+
+crF <- cr
+
+crF$Stadio <- as.factor(crF$Stadio)
+crF$tipotumore <- as.factor(crF$tipotumore)
+crF$geneticm <- as.factor(crF$geneticm)
+
+
+#tibble(crF)
+summary(crF)
+
+```
+
+Ci sono 7 records con stringa vuota dell'attributo **Stadio** del tumore, 3 records con stringa vuota dell'attributo **tipotumore**, e 5 NA, cioè dati mancanti nell'**incidenza**. Questi records vanno tolti perché i dati sono essenziali per le future analisi, e comunque sono in totale 15 recrds rispetto a 10005 record complessivi, ovvero 0,01% dei dati da rimuovere. 
+
+```{r, echo=TRUE, eval=TRUE, message=FALSE}
+cr <- na.omit(cr)
+cr <- cr[!(trimws(cr$Stadio)==""| trimws(cr$tipotumore)==""), ]
+
+crF <- na.omit(crF)
+crF <- crF[!(trimws(crF$Stadio)==""| trimws(crF$tipotumore)==""), ]
+summary(crF)
+#tibble(crF)
+```
+
+```{r, echo=TRUE, eval=TRUE, message=FALSE}
+dups<- crF$idnum[which(duplicated(crF$idnum))]
+dups
+length(dups)
+```
+Tre record con idnum $$192, 363, 1933$$ sono duplicati e vanno rimmossi.
+
+
+```{r, echo=TRUE, eval=TRUE, message=FALSE}
+cr<- distinct(cr)
+
+crF<- distinct(crF)
+tibble(crF)
+summary(crF)
+```
+### 1.3 Dataset "SDO.csv"
+
+```{r eval=TRUE, echo=TRUE, message=FALSE, warning=FALSE}
+
+sdo <- read.csv2 ("SDO.csv")
+sdo$dataprestazione <- as.Date(sdo$dataprestazione, format = "%d/%m/%Y")
+sdo$dimissione <- as.Date(sdo$dimissione, format = "%d/%m/%Y")
+
+sdoF <- sdo
+
+sdoF$Prestazione <- as.factor(sdoF$Prestazione)
+
+#tibble(sdoF)
+summary(sdoF)
+
+```
+Analisi descrittiva dimostra che c'è 1 NA nella colonna **dataprestazione** e 3 NA nella colonna **dimissione** che vanno rimmossi.Saranno anche rimmossi eventuali duplicati.
+
+Nel dstaset **sdo2** i dati sono raggruppati per ospedale ed è evidente che il numero di pazienti per ospedale non è molto differente l'uno dagli altri. 
+
+```{r, eval=TRUE, echo=TRUE, message=FALSE, warning=FALSE}
+
+sdo <- na.omit(sdo)
+sdo <- distinct(sdo) 
+
+sdoF <- na.omit(sdoF)
+sdoF <- distinct(sdoF)
+
+summary(sdoF)
+tibble(sdoF)
+
+sdof2 <- sdoF%>% group_by(ospedale) %>% summarise(n())
+sdof2
+```
+
+```{r, eval=TRUE, echo=TRUE, message=FALSE, warning=FALSE}
+#Record con date incongruenti
+toRemove <- sdoF[(sdoF$dataprestazione > sdoF$dimissione ), ]
+toRemove
+#tibble(toRemove)
+
+```
+**42** record hanno date inconguenti, ovvero i soggetti sarebbero stati dimessi prima di essere sottoposti alle terapie, quindi questi record vanno rimossi. 
+
+```{r, eval=TRUE, echo=TRUE, message=FALSE, warning=FALSE}
+sdoF <- sdoF[!(sdoF$dataprestazione > sdoF$dimissione ), ]
+#tibble(sdoF)
+#summary(sdoF)
+
+sdof2 <- sdoF%>% group_by(ospedale) %>% summarise(n())
+sdof2
+```
+
+### 1.4 Dataset "Deathregister.csv"
+
+```{r, eval=TRUE, echo=TRUE, message=FALSE, warning=FALSE}
+
+dreg <- read.csv2 ("Deathregister.csv")
+dreg$enddate <- as.Date(dreg$enddate, format = "%Y-%m-%d")
+
+dregF <- dreg
+dregF$dead <- as.factor(dregF$dead)
+
+tibble(dregF)
+summary(dregF)
+
+```
+```{r, eval=TRUE, echo=TRUE, message=FALSE, warning=FALSE}
+dups<- dregF$idnum[which(duplicated(dregF$idnum))]
+dups
+length(dups)
+```
+
+## 2. Indicatore ‘Intervento chirurgico di asportazione del tumore al seno entro 60 giorni dalla data di diagnosi’
+
+**Effettuare il record-linkage con lo scopo di costruire l’indicatore ‘Intervento chirurgico di asportazione del tumore al seno entro 60 giorni dalla data di diagnosi’su base mensile per casi incidenti nel mese di gennaio 1984.**
+
+```{r, eval=TRUE, echo=TRUE, message=FALSE, warning=FALSE}
+
+join2 <- inner_join(crF, sdoF, by = "idnum")
+nrow(join2)
+
+join2 <- join2 [!(join2$dimissione < join2$incidenza | join2$dataprestazione < join2$incidenza),]
+nrow(join2)
+
+join2 <- inner_join(join2, ghrF, by = "idnum") %>%
+  filter(incidenza >=  as.Date("01/01/1984", "%d/%m/%Y") & incidenza <=  as.Date("31/01/1984", "%d/%m/%Y")) %>%     
+  filter(sex == "Female") %>%
+  filter (tipotumore == "seno") %>%
+  filter(Stadio == "Stadio I" | Stadio == "Stadio II" )%>%
+  filter (Prestazione == "chirurgica") 
+
+summary(join2)
+#tibble(join2)
+
+denominatore <- nrow(join2)
+denominatore
+
+join2$tempoIntervento <- join2$dataprestazione - join2$incidenza 
+
+numeratore <- nrow( join2 %>% filter(tempoIntervento <= 60)) 
+numeratore
+
+indicatoreTot = numeratore/denominatore
+indicatoreTot
+```
+Per calcolare l'indicatore abbiamo selezionato i soggetti che soddisfano i criteri predefiniti:                   
+sesso : femminile                                    
+tipotumore: seno                                          
+incidenza: dal 01/01/1984 al 31/01/1984                            
+stadio: I e II                                            
+prestazione: chirurgica                                      
+
+Per calcolare il numeratore, tra i soggetti selezionati, abbiamo preso coloro che ahnno avuto l'intervento entro 60 giorni dalla diagnosi. 
+
+Indicatore **‘Intervento chirurgico di asportazione del tumore al seno entro 60 giorni dalla data di diagnosi’** 
+                               $$I= 0.5530547$$
+
+
+## 3. Indicatore per ospedale 
+
+**Calcolare l'indicatore 'Intervento chirurgico di asportazione del tumore al seno entro 60 giorni dalla data di diagnosi' per ospedale e darne rppresentazione grafica, includendo come valore di riferimento nel grafico l'indicatore calcolato sull'intero dataset.**
+
+```{r, eval=TRUE, echo=TRUE, message=FALSE, warning=FALSE, results="hide"}
+
+join3 <- inner_join(crF, sdoF, by = "idnum")
+
+join3$tempoIntervento <- join3$dataprestazione - join3$incidenza 
+
+join3 <- inner_join(join3, ghrF, by = "idnum") %>%
+  filter(incidenza >=  as.Date("01/01/1984", "%d/%m/%Y") & incidenza <=  as.Date("31/01/1984", "%d/%m/%Y")) %>%     
+  filter(sex == "Female") %>%
+  filter (tipotumore == "seno") %>%
+  filter(Stadio == "Stadio I" | Stadio == "Stadio II" )%>%
+  filter (Prestazione == "chirurgica") 
+
+join3$status <- ifelse(join3$tempoIntervento <= 60, 1, 0) # 1 intervento, 0 non intervento
+
+summary(join3)
+#tibble(join3)
+```
+
+```{r, eval=TRUE, echo=TRUE, message=FALSE, warning=FALSE,results="hide" }
+
+TTS <- table(join3$status,join3$ospedale)
+TTS
+
+prop.table(TTS,2)
+TTS
+
+prop.test(TTS[2,1],TTS[1,1]+TTS[2,1])
+
+lower <- c()
+upper <- c()
+for (i  in (1:(length(TTS)/2))) {
+  ci <- prop.test(TTS[2, i], TTS[1, i]+TTS[2,i])$conf.int
+  lower <- append(lower, ci[1])
+  upper <- append(upper, ci[2])
+}
+
+interventi_perc <- prop.table(table(join3$status,join3$ospedale), 2)[2,]
+ospedale <- names(interventi_perc)
+num<-as.numeric(table(join3$ospedale))
+
+df <- data.frame(ospedale, num,interventi_perc, lower, upper)
+
+dt <- as.data.table(df)
+dt %>% ggplot +
+  geom_point( aes(x=ospedale, y=interventi_perc,size=num), stat="identity", alpha=0.7) +  
+  ylab("intervento a meno di 60 gg")+
+  geom_errorbar( aes(x=ospedale, ymin=lower, ymax=upper), width=0.4, colour="black", 
+                 alpha=0.9, size=0.9) + 
+  geom_hline(yintercept=indicatoreTot)
+
+```
+
+
+**Indicatore per ospedale**
+
+            
+      1         2         3         4         5         6         7         8
+  
+  1 0.4615385 0.6428571 0.4848485 0.5217391 0.5652174 0.5454545 0.6206897 0.6279070
+   
+            9
+  
+  1 0.5405405
+
+## 4. Associazione tra il livello di educazione e indicatore
+
+**Utilizzare il dataset ottenuto per valutare l'associazione a livello individuale tra il livello di educazione ed il valore dell'indicatore 'Intervento chirurgico di asportazione del tumore al seno entro 60 giorni dalla data di diagnosi'.**
+
+**Quale misura di effetto è possibile stimare? Calcolate ed interpretate tale misura di effetto grezza. Riportare anche la relativa tabella di contingenza.** 
+
+In questo caso la misura di effetto che è possibile stimare è l**'Odds Ratio**.
+
+
+```{r, eval=TRUE, echo=TRUE, message=FALSE, warning=FALSE}
+
+join4 <- join3
+join4$statusF <- factor(join4$status, levels = c(1,0))
+
+contTable <- xtabs( ~ join4$education + join4$statusF  )
+contTable
+
+epi.2by2(dat=contTable, method="case.control")
+```
+
+Odds ratio (W) = 0.97, CI (0.51, 1.87)
+
+
+L'OR è **0.97**, molto vicino a 1, l'intervallo di confidenza comprende l'1 e di conseguenza l'OR non è  significativamente diverso dall'1. Quindi, i soggetti con la formazione medio/alta hanno lo stesso odds di avere l'intervento chirurgico al seno entro 60 giorni dalla diagnosi come i soggeti con la formazione bassa, ovvero **non c'è associazion**e a livello individuale tra il livello dell'educazione e il valore dell'indicatore.
+
+## 5. OR aggiustato per la variabile 'work'
+
+**Calcolate la stessa misura di effetto, questa volta aggiustata per la sola variabile 'work, mediante il metodo Mantel-Haenszel. Interpretate il risultato.**
+
+
+Poiché non c'è associazione statistica a livello individuale tra il livello di educazione e il valore dell'indicatore, non ha senso aggiustare questo OR per l'effetto di qualsiasi altra variabile. 
+In particolare, in questo caso è impossibile provare ad aggiustare per la variabile **'work'** con il metodo Mantel Haenszel, dato che in una delle due tabelle di contingenza stratificate  per la variabile 'work', si ha uno 0 che poi nei calcoli produce NaNs.  
+
+
+```{r, eval=TRUE, echo=TRUE, message=FALSE, warning=FALSE}
+
+join5 <- join3
+
+join5$statusF <- factor(join5$status, levels = c(1,0))
+
+join5G <- join5 %>%
+  group_by(statusF, education, work) %>%
+  summarise(count=n())
+
+tibble(join5G)
+
+tab_join5G <- xtabs(join5G$count ~ join5G$education + join5G$work + join5G$statusF)
+tab_join5G
+
+join5G_yes <- join5G[join5G$work== "yes",]
+join5G_yes
+join5G_no <- join5G[join5G$work=="no",]
+join5G_no
+
+epi.2by2(xtabs(join5G_yes$count ~ join5G_yes$education + join5G_yes$statusF), method="case.control")
+
+epi.2by2(xtabs(join5G_no$count ~ join5G_no$education + join5G_no$statusF), method="case.control")
+
+epi.2by2(tab_join5G, method = "case.control")
+
+```
+
+
+## 6. Stima dell'associazione tra il livello di educazione e il valore dell'indicatore, aggiustata per confondenti tramite regressione logistica
+
+**Stimate l'associazione a livello individuale tra il livello di educazione ed il valore dell'indicatore, aggiustata per tutte le variabili disponibili che ritenete opportuno inserire come potenziali confondenti, mediante un modello di regressione logistica.Interpretate i risultati.**
+**Su quanti soggetti avete effettuato l'analisi?**
+**Quali variabili sono associate all'indicatore? In che modo?**
+
+
+```{r, eval=TRUE, echo=TRUE, message=FALSE, warning=FALSE}
+
+# Associazione a livello individuale tra il livello di educazione 
+# e il valore dell'indicatore
+join6 <- join3 
+nrow(join6)
+
+join6$statusF <- factor(join6$status, levels = c(0,1))
+join6$education <- relevel(join6$education, ref = "low") 
+join6$work <- relevel(join6$work, ref = "no")
+
+
+model6_overall <- glm((statusF ~ education),data = join6, family = "binomial")
+model6_overall
+
+summary(model6_overall)
+
+exp(cbind("OR" = coef(model6_overall), confint.default(model6_overall, level = 0.95)))
+
+```
+Le analisi sono state fatte su **311** soggetti.
+
+Applicando il modello di regressione logistica, veniamo alla stessa conclusione ottenuta al punto 4: a livello individuale non c'è l'associazione tra il livello di educazione e il valore dell'indicatore. 
+
+La stima del coefficiente **Beta = -0.0254** non è significativamente diversa da 0, perché il **p-value** supera di gran lunga **0.05** (**p = 0.9393**).
+
+L'**Odds ratio** è vicino a 1, OR = 0.9749205 (come l'OR grezzo al punto 4), e l'intervallo di confidenza comprende 1, quindi i soggetti con un'educazione medio-alta hanno lo stesso odds di avere l'intervento entro 60 giorni, come i soggetti con un educazione bassa. 
+
+Poiché non c'è associazione a tra il livello di educazione e il valore dell'indicatore, non ha senso cercare i potenziali confondenti. 
+
+
+```{r, eval=TRUE, echo=TRUE, message=FALSE, warning=FALSE}
+
+# Variabili associate all'indicatore 
+
+# Si riporta soltanto il codice di verifica dell'associazione con lo stadio
+# dell'unica variabile risultata associata all'indicatore. 
+# Tutte le altre variabili disponibili:'ospedale', 'geneticm', 'smoke', 
+#  'married', 'kids', 'work', 'age' non risultano associate
+# al valore dell'indicatore.
+
+join6$Stadio <- relevel (join6$Stadio, ref = "Stadio I")
+
+model_st <- glm((statusF ~ Stadio),data = join6, family = "binomial")
+summary(model_st)
+exp(cbind("OR" = coef(model_st), confint.default(model_st, level = 0.95)))
+
+```
+  
+L'unica variabile associata al valore dell'indicatore e la variabile **'Stadio'**, ed è un'associazione positiva. 
+Il coefficiente **Beta =  0.9889** è significamente diverso da 0, poiché **p-value** è minore del 0.05 (**p = 0.000405**). 
+L'**Odds ratio** è  **OR = 2.6882160**, con intervallo di confidenza **CI = (1.5540877, 4.6499986)**, quindi i soggetti che hanno il tumore al seno allo **Stadio II** hanno l'odds di avere l'intervento chirurgico entro 60 giorni dalla diagnosi  **quasi 3** volte maggiore rispetto ai pazienti aventi il tumore allo **Stadio I**. 
+  
+     
+## 7. Tumore al colon 
+
+**Considerate ora tutti i tumori al colon insorti nel gennaio 1984. Unire i data-set utili per studiare la mortalità del tumore al colon nei soggetti inclusi nell'estrazione del German Health Register (dataset 1).**
+
+**Selezionate i record relativi ai tumori al colon e stimate la sopravvivenza a 5 anni.**
+**Quanti soggetti sono inclusi nell'analisi?**
+**Quanti pazienti sono morti nel periodo d'interesse?**
+**Riportare graficamente la stima della sopravvivenza nei primi 5 anni dalla diagnosi stimata tramite lo stimatore di Kaplan-Meier.**
+**Stimare approssimativamente la sopravvivenza mediana.**
+
+ 
+```{r, eval=TRUE, echo=TRUE, message=FALSE, warning=FALSE}
+
+#Selezione dati
+join7 <- inner_join(crF, dregF, by = "idnum")
+nrow(join7)
+
+join7 <- inner_join(join7, ghrF, by = "idnum") %>%
+  filter(incidenza >=  as.Date("01/01/1984", "%d/%m/%Y") & incidenza <=  as.Date("31/01/1984", "%d/%m/%Y")) %>%     
+  filter(enddate <=  as.Date("31/12/1988", "%d/%m/%Y")) %>%     
+  filter (tipotumore == "colon")
+
+#tibble(join7)
+```
+
+
+```{r, eval=TRUE, echo=TRUE, message=FALSE, warning=FALSE, results="hide"}
+
+# Stima della sopravvivenza con lo stimatore di Kapan Meier
+join7$timeFUP <- as.numeric(( join7$enddate - join7$incidenza)/365.25)
+join7$dead <- as.numeric(join7$dead)
+
+fit7<-survfit(Surv(timeFUP, dead) ~1,data=join7)
+summary(fit7)
+
+names(fit7)
+```
+
+```{r, eval=TRUE, echo=TRUE, message=FALSE, warning=FALSE}
+#Curva di sopravvivenza con numero di soggetti a rischio
+ggsurvplot(fit7, data = join7, risk.table = TRUE, xlab = c("Time in years"), 
+           surv.median.line = "hv", ggtheme=theme_minimal(), 
+           title = 'Stima Kaplan Meier della sopravvivenza')
+
+#Curva di sopravvivenza con numero di soggetti a rischio e numero eventi cumulato
+ggsurvplot(fit7, data = join7, risk.table = TRUE, fontsize = 2.5,cumevents = TRUE, 
+           xlab = c("Time in years"), surv.median.line = "hv", 
+           ggtheme=theme_minimal(), title = 'Stima Kaplan Meier della sopravvivenza') 
+```
+
+In questa analisi sono stati inclusi **1304** soggetti.
+
+Ci sono stati **707** eventi, ovvero **707** soggetti sono morti.
+
+La stima approssimativa della mediana è **3.86** anni.
+
+
+## 8. Stima della sopravvivenza per stadio
+
+**Stimare la funzione di sopravvivenza nei primi 5 anni dalla diagnosi per Stadio ed effettuare un test d'ipotesi per verificare se l'azzardo di morte sia diverso per stadio di malattia alla diagnosi.** 
+
+
+### 8.1 Stima della funzione di sopravvivenza per stadio di malattia
+
+La funzione di sopravvivenza viene stimata con il metodo **Kaplan - Meier**. 
+
+```{r, eval=TRUE, echo=FALSE, message=FALSE, warning=FALSE, results="hide"}
+join8 <- join7
+
+# KM stima della sopravvivenza
+fit8<- survfit(Surv(timeFUP, dead) ~ Stadio ,data=join8)
+summary(fit8)
+```
+
+```{r, eval=TRUE, echo=TRUE, message=FALSE, warning=FALSE}
+#Curva di sopravvivenza stratificata per stadio di malattia
+ggsurvplot(fit8, data = join8, conf.int = TRUE, xlab = c("Time in years"), 
+           surv.median.line = "hv", ggtheme=theme_minimal(),
+           title = 'Stima della sopravvivenza per stadio di malattia')
+
+#Curva di sopravvivenza con numero di soggetti a rischio 
+ggsurvplot(fit8, data = join8, risk.table = TRUE,  risk.table.height = 0.3,
+           fontsize =2.5, xlab = c("Time in years"), 
+           surv.median.line = "hv", ggtheme=theme_minimal(), 
+           title = 'Stima della sopravvivenza per stadio di malattia') 
+```
+
+
+### Verifica la differenza di azzardo per stadio di malattia
+
+
+```{r, eval=TRUE, echo=TRUE, message=FALSE, warning=FALSE}
+# Verifica se l'azzardo di morte è diverso per stadio di malattia
+
+# Stadio I vs. Stadio II, Stadio III, Stadio IV
+
+join8$stadio1 <- ifelse(join8$Stadio == "Stadio I", 1, 0)
+join8$stadio2 <- ifelse(join8$Stadio == "Stadio II", 1, 0)
+join8$stadio3 <- ifelse(join8$Stadio == "Stadio III", 1, 0)
+join8$stadio4 <- ifelse(join8$Stadio == "Stadio IV", 1, 0)
+
+#Modello di Cox
+model8 <- coxph(Surv(timeFUP, dead) ~ stadio2 + stadio3 + stadio4, data = join8)
+summary(model8)
+
+# Verifica dell'assunzione della proporzionalità di azzardi tramite Schoenfeld test
+#Stadio II
+par(mfrow=c(1,2),mar=c(4,4,2,2))
+checkPH.stadio2 <-cox.zph(model8)[1]
+plot(checkPH.stadio2,main="Check PH assumption of Stadio II")
+points(checkPH.stadio2$x,checkPH.stadio2$y,pch=16,col="lightgray")
+abline(h=0,lty=2,col=2)
+
+#Stadio III
+par(mfrow=c(1,2),mar=c(4,4,2,2))
+checkPH.stadio3 <-cox.zph(model8)[2]
+plot(checkPH.stadio3,main="Check PH assumption of Stadio III")
+points(checkPH.stadio3$x,checkPH.stadio3$y,pch=16,col="lightgray")
+abline(h=0,lty=2,col=2)
+
+#Stadio IV
+par(mfrow=c(1,2),mar=c(4,4,2,2))
+checkPH.stadio4 <-cox.zph(model8)[3]
+plot(checkPH.stadio3,main="Check PH assumption of Stadio IV")
+points(checkPH.stadio3$x,checkPH.stadio3$y,pch=16,col="lightgray")
+abline(h=0,lty=2,col=2)
+```
+
+
+Lo stadio di riferimento è lo **Stadio I**. Quindi, i soggetti allo **Stadio II** di malattia avrebbero **1,175** volte magiore l'azzardo di morire rispetto ai soggetti allo **Stadio I**. Poiché l'intervallo di confidenza dell'hazard ratio, (exp(coeff)), comprende l'1 si conclude che questa differenza non è statisticamente significativa, e praticamente i soggetti allo **Stadio II** hanno lo stesso azzardo di morire come i sogetti allo **Stadio I**. 
+
+I soggetti allo **Stadio III** hanno **1,539** volte maggiore l'azzardo di morire rispetto ai malati allo **Stadio I**. Dall'intervallo di confidenza concludiamo che nella peggiore delle ipotesi (upper .95), l'azzardo di morire dei malati allo **Stadio III** è il **doppio** dell'azzardo dei malati del gruppo di riferimento. 
+
+Le persone che hanno il tumore al colon allo **Stadio IV** hanno **2,6** volte maggiore l'azzardo di morire rispetto ai malati allo **Stadio I**. Nella migliore ipotesi (limite inferiore) loro avrebbero l'azzardo raddoppiato rispetto al gruppo di riferimento, mentre nella peggiore ipotesi (limite superiore), l'azzardo di morire sarebbe **3,4** volte maggiore rispetto ai malati allo **Stadio I**.  
+
+L'applicazione del Cox model prevede l'assunto della proporzionalità di azzardi. Questo assunto che è stato verificato usando il Schoenfeld test (di residui) che ha confermato la proporzionalità di azzardi tra diversi stadi di malattia. 
+
+## 9. Stima dell'associazione tra sesso e mortalità
+
+Applicare un modello per valutare l’associazione tra sesso e mortalità e interpretare la
+misura di effetto stimata.
+
+```{r, eval=TRUE, echo=TRUE, message=FALSE, warning=FALSE}
+
+join9 <- inner_join(cr, dreg, by = "idnum")
+
+
+join9 <- inner_join(join9, ghr, by = "idnum") %>%
+  filter(incidenza >=  as.Date("01/01/1984", "%d/%m/%Y") & incidenza <=  as.Date("31/01/1984", "%d/%m/%Y")) %>%     
+  filter(enddate <=  as.Date("31/12/1988", "%d/%m/%Y")) %>%     
+  filter (tipotumore == "colon")
+
+nrow(join9)
+#summary (join9)
+
+join9$dead <- as.factor(join9$dead)
+join9$sex <- factor(join9$sex, levels = c("Female","Male"))
+
+join9 %>% group_by(dead) %>%
+  summarise(count = n())
+
+#tibble(join9)
+
+model9_overall <- glm((dead ~ sex),data = join9, family = "binomial")
+model9_overall
+
+summary(model9_overall)
+
+exp(cbind("OR" = coef(model9_overall), confint.default(model9_overall, level = 0.95)))
+
+#str(join9)
+
+```
+
+In quest'analisi il gruppo di riferimento è il sesso femminile. C'è l'associazione tra sesso è mortalità, ed è statisticamente significante (il valore di coefficiente **Beta** per i **maschi** è **0.42439**, ed è significativamente diverso da 0 poiché il p-value è maggiore di 0.005, **p = 0.000149**.
+
+**OR = 1.53** 
+
+Secondo il risultato ottenuto, l'essere maschio sarebbe un fattore di rischio, perché i maschi hanno l'odds di morire **1.5** volte maggiore delle donne.  
+
+## 10. Associazione alla mortalità
+
+**Quali variabili sono associate alla mortalità? Riportare le relative stime di effetto con gli intervalli di confidenza.**
+
+
+```{r, eval=TRUE, echo=TRUE, message=FALSE, warning=FALSE, results="hide"}
+
+join10 <- join9
+
+#Associazione mortalità e stadio della malattia
+join10$Stadio <- as.factor(join10$Stadio)
+
+model_10_st <- glm((dead ~ Stadio),data = join10, family = "binomial")
+model_10_st
+
+summary(model_10_st)
+
+exp(cbind("OR" = coef(model_10_st), confint.default(model_10_st, level = 0.95)))
+
+#Associazione mortalità e fattore genetico
+join10$geneticm <- as.factor(join10$geneticm)
+
+model_10_g <- glm((dead ~ geneticm),data = join10, family = "binomial")
+model_10_g
+
+summary(model_10_g)
+
+exp(cbind("OR" = coef(model_10_g), confint.default(model_10_g, level = 0.95)))
+
+
+#Associazione mortalità e fumo
+join10$smoke <- as.factor(join10$smoke)
+
+model_10_sm <- glm((dead ~ smoke),data = join10, family = "binomial")
+model_10_sm
+
+summary(model_10_sm)
+
+exp(cbind("OR" = coef(model_10_sm), confint.default(model_10_sm, level = 0.95)))
+
+#Associazione mortalità ed educazione
+join10$education <- as.factor(join10$education)
+
+model_10_ed <- glm((dead ~ education),data = join10, family = "binomial")
+model_10_ed
+
+summary(model_10_ed)
+
+exp(cbind("OR" = coef(model_10_ed), confint.default(model_10_ed, level = 0.95)))
+
+
+# Associazione mortalità e anni compiuti
+
+model_10_age <- glm((dead ~ age),data = join10, family = "binomial")
+model_10_age
+
+summary(model_10_age)
+
+exp(cbind("OR" = coef(model_10_age), confint.default(model_10_age, level = 0.95)))
+
+```
+
+La variabile **Stadio** è associata alla mortalità.      
+
+_Stadio II      OR = 1.34  CI = (0.9929221, 1.8160142)     
+_Stadio III     OR = 2.09  CI = (1.3713977, 3.1979680)     
+_Stadio IV      OR = 14.24 CI = (8.2856031, 24.4665630)     
+
+
+La variabile **geneticm** che ripporta il valore del fattore genetico è associata alla mortalità.                      
+ 
+_geneticm (1)    OR = 6.29  CI = (3.7246681, 10.609802)        
+
+La variabile **smoke** è associata alla mortalità.         
+
+_smoke (yes)     OR = 1.49   CI = (1.1287853, 1.964621)           
+
+La variabile **education** è associata alla mortalità. 
+
+_education (medium/high)  OR = 1.82  CI = (1.217759, 2.732643)     
+
+La variabile **age** è associata alla mortalità. 
+
+_age            OR = 1.08   CI = (1.06470092, 1.09363976)            
+
+## 11. Valutazione di presenza di confondenti e/o modificatori d'effetto
+
+### 11.1 Valutazione confondenti
+
+```{r, eval=TRUE, echo=TRUE, message=FALSE, warning=FALSE}
+
+join11 <- join9
+
+join11$dead <- as.factor(join11$dead)
+join11$Stadio <- as.factor(join11$Stadio)
+join11$geneticm <- as.factor(join11$geneticm)
+join11$smoke <- as.factor(join11$smoke)
+join11$education <- as.factor(join11$education)
+
+
+#tibble(join11)
+
+# Aggiustamento per la variabile Stadio
+model11_adj_st <- glm((dead ~ sex + Stadio),data = join11, family = "binomial")
+model11_adj_st
+
+summary(model11_adj_st)
+
+exp(cbind("OR" = coef(model11_adj_st), confint.default(model11_adj_st, level = 0.95)))
+
+model11_int_st <- glm((dead ~ sex * Stadio),data = join11, family = "binomial")
+model11_int_st
+
+summary(model11_int_st)
+
+# Aggiustamento per la variabile geneticm
+model11_adj_g <- glm((dead ~ sex + geneticm),data = join11, family = "binomial")
+model11_adj_g
+
+summary(model11_adj_g)
+
+exp(cbind("OR" = coef(model11_adj_g), confint.default(model11_adj_g, level = 0.95)))
+
+model11_adj_g <- glm((dead ~ sex * geneticm),data = join11, family = "binomial")
+model11_adj_g
+
+summary(model11_adj_g)
+
+# Aggiustamento per la variabile smoke
+model11_adj_sm <- glm((dead ~ sex + smoke),data = join11, family = "binomial")
+model11_adj_sm
+
+summary(model11_adj_sm)
+
+exp(cbind("OR" = coef(model11_adj_sm), confint.default(model11_adj_sm, level = 0.95)))
+
+model11_adj_sm <- glm((dead ~ sex * smoke),data = join11, family = "binomial")
+model11_adj_sm
+
+summary(model11_adj_sm)
+
+# Aggiustamento per la variabile education
+model11_adj_ed <- glm((dead ~ sex + education),data = join11, family = "binomial")
+model11_adj_ed
+
+summary(model11_adj_ed)
+
+exp(cbind("OR" = coef(model11_adj_ed), confint.default(model11_adj_ed, level = 0.95)))
+
+model11_adj_ed <- glm((dead ~ sex * education),data = join11, family = "binomial")
+model11_adj_ed
+
+summary(model11_adj_ed)
+
+
+# Aggiustamento per la variabile age
+model11_adj_age <- glm((dead ~ sex + age),data = join11, family = "binomial")
+model11_adj_age
+
+summary(model11_adj_age)
+
+exp(cbind("OR" = coef(model11_adj_age), confint.default(model11_adj_age, level = 0.95)))
+
+model11_adj_age <- glm((dead ~ sex * age),data = join11, family = "binomial")
+model11_adj_age
+
+summary(model11_adj_age)
+```
+
+La variabile Stadio non è confondente, perché modifica l'associazione tra mortalita e sesso, ovvero modifica l'OR, per meno del 5% (da 1.53 a 1.58). Non c'è interazione tra le variabili sesso e Stadio di malattia.  
+
+La variabile geneticm non è confondente, dato che non modifica l'associazione tra mortalità e sesso (l'OR in entrambi i casi è uguale 1.53). Non c'è interazione tra le variabili sesso e geneticm.  
+
+La variabile smoke non è confondente, perché modifica l'associazione tra mortalità e sesso, ovvero modifica l'OR, per meno del 5% (da 1.53 a 1.51). Non c'è interazione tra le variabili sesso e smoke.    
+
+La variabile education non è confondente, perché modifica l'associazione tra mortalità e sesso, ovvero modifica l'OR, per meno del 5% (da 1.53 a 1.51), però c'è l'interazione tra le variabili education e sex, ovvero la variabile education modifica l'effetto della variabile sex (i coefficienti **sexMale:age** per diverse età sono significamente diversi da 0, i loro p-values sono minori di 0.05)  
+
+La variabile **age** è confondente, perché modifica l'associazione tra mortalita e sesso, ovvero modifica l'OR, per più del 5% (da 1.53 a 1.69). Non c'è interazione tra le variabili age e sesso.
+
+### 11.2 Valutazione interazione tra le variabili sesso ed educazione 
+
+
+```{r, eval=TRUE, echo=TRUE, message=FALSE, warning=FALSE}
+
+#tibble(join11)
+#summary(join11)
+
+join11$dead <- relevel(join11$dead, ref = "1")
+join11$sex <- relevel(join11$sex, ref = "Male")
+join11$education <- relevel(join11$education, "medium/high")
+
+
+join11G <- join11 %>%
+  group_by(dead, sex, education) %>%
+  summarise(count=n())
+
+tab_join11G <- xtabs(join11G$count ~ join11G$sex + join11G$education + join11G$dead)
+tab_join11G
+
+join11G_Male <- join11G[join11G$sex == "Male",]
+join11G_Male
+join11G_Female <- join11G[join11G$sex == "Female",]
+join11G_Female
+
+epi.2by2(xtabs(join11G_Male$count ~ join11G_Male$education + join11G_Male$dead), method="case.control")
+
+epi.2by2(xtabs(join11G_Female$count ~ join11G_Female$education + join11G_Female$dead), method="case.control")
+
+```
+Dai risultati si evince che c'è interazione tra le variabili sesso e educazione, ed è quantitativa. L'educazione modifica l'effetto della variabile sesso.
+
+L'**OR nei maschi** è **1,17** (rispetto all'OR non stratificato che era 1,5 e significativamente diverso da 0). L'intervallo di confidenza comprende l'1 (**CI = (0.68, 2.01) **), quindi l'OR nei maschi non è significativamente diverso da 0, ovvero la mortalità di maschi non dipende dalla loro educazione. 
+
+Le donne con un'educazione medio/alta hanno, invece, l'odds di morire quasi **3** volte maggiore delle donne con un educazione bassa (**OR = 2.92, CI = (1.58, 5.41)**).
+
+## 12. Modello finale
+
+```{r, eval=TRUE, echo=TRUE, message=FALSE, warning=FALSE}
+
+#tibble(join11)
+#summary(join11)
+
+join12 <- join9
+
+join12$dead <- as.factor(join12$dead)
+join12$sex <- factor(join12$sex, levels = c("Female","Male"))
+join12Stadio <- as.factor(join12$Stadio)
+join12$geneticm <- as.factor(join11$geneticm)
+join12$smoke <- as.factor(join11$smoke)
+join12$education <- as.factor(join11$education)
+
+
+model_final <- glm(dead ~ sex + Stadio + geneticm + age + 
+               smoke + education, data = join12, family = "binomial")
+#model_final
+
+summary(model_final)
+
+anova(model_final, test="Chisq")
+
+```
+Nei punti precedenti si è visto che 6 variabili sono associate alla mortalità per il tumore al colon: sex, Stadio, age, geneticm, smoke ed education. Tutte e sei le variabili sono state incluse nel modello finale poiché tutte contribuiscono in maniera significativa (in particolare Stadio e age) alla riduzione della varianza residua (Anova, test Chi-quadro). 
+ 
+La variabile age agisce da confondente nell'associazione tra la mortalità e sesso, e quindi dobbiamo includerle tutte e due, sesso e age.
+
+C'è interazione tra l'educazione e sesso. Nonostante l'educazione interferisce diversamente sui maschi e sulle donne, viene inclusa nel modello per il suo contributo nella riduzione della devienza residua. 
+ 
+Queste sei variabilili le possiamo considerare fattori di rischio della mortalità dopo il tumore al colon. 
