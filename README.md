@@ -1,2 +1,2 @@
-# DS_BigDataInPublicHealth
-Final exam project - Big Data in Public Health
+# Analysis of Public Health Data for Cancer Treatment Outcomes and Mortality Risk Factors
+This project focuses on analyzing multiple public health datasets to explore factors related to cancer treatment and outcomes. The goal is to perform data cleaning, statistical analysis, and record linkage to calculate health indicators, such as the timing of surgeries for cancer patients. Key analyses include evaluating the impact of variables like education level and employment status on treatment outcomes, as well as conducting survival analysis for cancer patients to assess factors influencing mortality. The project also involves building predictive models to identify risk factors for mortality and cancer progression, providing insights for improving healthcare interventions and policy decisions. Here is the [project presentation](SStanisic_FinalProject.pdf)
